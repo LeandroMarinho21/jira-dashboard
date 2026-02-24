@@ -50,33 +50,32 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
         print("Erro: Configure JIRA_URL, JIRA_EMAIL e JIRA_API_TOKEN no .env")
         sys.exit(1)
 
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
     fields = "summary,status,issuetype,priority,assignee,project,created,updated"
     all_issues = []
     max_per_page = 100
     next_page_token = None
 
-    # Jira Cloud: novo endpoint /search/jql (POST). Jira Server: /search (GET) com api/2.
+    # Jira Cloud: novo endpoint /search/jql (GET - mais estável que POST).
+    # Ref: https://confluence.atlassian.com/jirakb/run-jql-search-query-using-jira-cloud-rest-api-1289424308.html
     if JIRA_API_VERSION == "3":
         url = f"{JIRA_URL}/rest/api/3/search/jql"
         while len(all_issues) < max_results:
-            body = {
+            params = {
                 "jql": jql,
                 "maxResults": min(max_per_page, max_results - len(all_issues)),
-                "fields": [f.strip() for f in fields.split(",")],
             }
             if next_page_token:
-                body["nextPageToken"] = next_page_token
-            resp = requests.post(
+                params["nextPageToken"] = next_page_token
+            resp = requests.get(
                 url,
-                json=body,
-                headers=headers,
+                params=params,
+                headers={"Accept": "application/json"},
                 auth=get_auth(),
                 timeout=30,
             )
             if resp.status_code != 200:
                 print(f"Erro JIRA API: status {resp.status_code}")
-                print(f"Resposta: {resp.text[:300]}")
+                print(f"Resposta: {resp.text[:500]}")
                 resp.raise_for_status()
             try:
                 data = resp.json()
