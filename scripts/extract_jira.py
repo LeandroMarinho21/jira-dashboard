@@ -43,71 +43,71 @@ def get_auth():
 
 
 def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000) -> list:
-    """Busca issues do JIRA usando JQL com paginação."""
+    """Busca issues do JIRA usando JQL com paginação.
+    Usa /rest/api/3/search/jql (novo endpoint - /search foi descontinuado e retorna 410).
+    """
     if not all([JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN]):
         print("Erro: Configure JIRA_URL, JIRA_EMAIL e JIRA_API_TOKEN no .env")
         sys.exit(1)
 
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    fields = "summary,status,issuetype,priority,assignee,project,created,updated"
     all_issues = []
-    start_at = 0
     max_per_page = 100
+    next_page_token = None
 
-    api_ver_ok = None
-    for api_ver in [JIRA_API_VERSION, "2", "3"]:
-        url = f"{JIRA_URL}/rest/api/{api_ver}/search"
-        params = {
-            "jql": jql,
-            "startAt": start_at,
-            "maxResults": max_per_page,
-            "fields": "summary,status,issuetype,priority,assignee,project,created,updated",
-        }
-        resp = requests.get(
-            url,
-            params=params,
-            headers=headers,
-            auth=get_auth(),
-            timeout=30,
-        )
-        if resp.status_code != 200:
-            print(f"API v{api_ver}: status {resp.status_code}, tentando outra versão...")
-            continue
-        ct = resp.headers.get("Content-Type", "")
-        if "application/json" not in ct and resp.text.strip().startswith("<"):
-            print(f"API v{api_ver}: resposta HTML (possível página de login/erro)")
-            print(f"  Início da resposta: {resp.text[:150]!r}")
-            continue
-        try:
-            data = resp.json()
-        except json.JSONDecodeError:
-            print(f"API v{api_ver}: resposta não é JSON. Início: {resp.text[:150]!r}")
-            continue
-        api_ver_ok = api_ver
-        break
+    # Jira Cloud: novo endpoint /search/jql (POST). Jira Server: /search (GET) com api/2.
+    if JIRA_API_VERSION == "3":
+        url = f"{JIRA_URL}/rest/api/3/search/jql"
+        while len(all_issues) < max_results:
+            body = {
+                "jql": jql,
+                "maxResults": min(max_per_page, max_results - len(all_issues)),
+                "fields": [f.strip() for f in fields.split(",")],
+            }
+            if next_page_token:
+                body["nextPageToken"] = next_page_token
+            resp = requests.post(
+                url,
+                json=body,
+                headers=headers,
+                auth=get_auth(),
+                timeout=30,
+            )
+            if resp.status_code != 200:
+                print(f"Erro JIRA API: status {resp.status_code}")
+                print(f"Resposta: {resp.text[:300]}")
+                resp.raise_for_status()
+            try:
+                data = resp.json()
+            except json.JSONDecodeError:
+                print(f"Resposta não é JSON: {resp.text[:200]!r}")
+                raise
+            issues = data.get("issues", [])
+            all_issues.extend(issues)
+            next_page_token = data.get("nextPageToken")
+            if not next_page_token or not issues:
+                break
     else:
-        print("Erro: Nenhuma versão da API retornou JSON válido.")
-        print("Verifique: JIRA_URL (apenas base, ex: https://xxx.atlassian.net), JIRA_EMAIL, JIRA_API_TOKEN")
-        sys.exit(1)
-
-    while True:
-        issues = data.get("issues", [])
-        all_issues.extend(issues)
-        total = data.get("total", 0)
-        if start_at + len(issues) >= total or len(issues) == 0:
-            break
-        start_at += len(issues)
-        if len(all_issues) >= max_results:
-            break
-        params["startAt"] = start_at
-        resp = requests.get(
-            f"{JIRA_URL}/rest/api/{api_ver_ok}/search",
-            params=params,
-            headers=headers,
-            auth=get_auth(),
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = resp.json()
+        # Jira Server/Data Center: endpoint antigo /rest/api/2/search
+        url = f"{JIRA_URL}/rest/api/2/search"
+        start_at = 0
+        while True:
+            params = {
+                "jql": jql,
+                "startAt": start_at,
+                "maxResults": max_per_page,
+                "fields": fields,
+            }
+            resp = requests.get(url, params=params, headers=headers, auth=get_auth(), timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            issues = data.get("issues", [])
+            all_issues.extend(issues)
+            total = data.get("total", 0)
+            if start_at + len(issues) >= total or len(issues) == 0 or len(all_issues) >= max_results:
+                break
+            start_at += len(issues)
 
     return all_issues[:max_results]
 
