@@ -9,17 +9,31 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _normalize_jira_url(url: str) -> str:
+    """Extrai apenas a base da URL (scheme + host) para a API."""
+    url = (url or "").strip().rstrip("/")
+    if not url:
+        return ""
+    parsed = urlparse(url)
+    base = f"{parsed.scheme or 'https'}://{parsed.netloc or parsed.path.split('/')[0]}"
+    return base.rstrip("/")
+
+
 # Configuração
-JIRA_URL = os.getenv("JIRA_URL", "").rstrip("/")
+JIRA_URL = _normalize_jira_url(os.getenv("JIRA_URL", ""))
 JIRA_EMAIL = os.getenv("JIRA_EMAIL", "")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN", "")
 JIRA_FILTER_IDS = os.getenv("JIRA_FILTER_IDS", "")
+# Jira Cloud = api/3, Jira Server/Data Center = api/2
+JIRA_API_VERSION = os.getenv("JIRA_API_VERSION", "3")
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
@@ -34,7 +48,7 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
         print("Erro: Configure JIRA_URL, JIRA_EMAIL e JIRA_API_TOKEN no .env")
         sys.exit(1)
 
-    url = f"{JIRA_URL}/rest/api/3/search"
+    url = f"{JIRA_URL}/rest/api/{JIRA_API_VERSION}/search"
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
     all_issues = []
     start_at = 0
@@ -55,7 +69,14 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
             timeout=30,
         )
         resp.raise_for_status()
-        data = resp.json()
+        try:
+            data = resp.json()
+        except json.JSONDecodeError:
+            print(f"Erro: a API do JIRA retornou algo que não é JSON.")
+            print(f"Status HTTP: {resp.status_code}")
+            print(f"Resposta (início): {resp.text[:300]!r}")
+            print("Dica: Verifique JIRA_URL (ex: https://sua-empresa.atlassian.net) e credenciais.")
+            raise
         issues = data.get("issues", [])
         all_issues.extend(issues)
         total = data.get("total", 0)
@@ -70,7 +91,7 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
 
 def get_filter_jql(filter_id: str) -> str | None:
     """Obtém a JQL de um filtro pelo ID."""
-    url = f"{JIRA_URL}/rest/api/3/filter/{filter_id}"
+    url = f"{JIRA_URL}/rest/api/{JIRA_API_VERSION}/filter/{filter_id}"
     headers = {"Accept": "application/json"}
     resp = requests.get(url, headers=headers, auth=get_auth(), timeout=30)
     if resp.status_code != 200:
