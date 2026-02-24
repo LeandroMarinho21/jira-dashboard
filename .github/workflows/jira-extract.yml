@@ -1,0 +1,39 @@
+name: JIRA Data Extraction
+
+on:
+  schedule:
+    # Executa diariamente às 8h UTC
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Extract JIRA data
+        env:
+          JIRA_URL: ${{ secrets.JIRA_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_FILTER_IDS: ${{ vars.JIRA_FILTER_IDS || '' }}
+        run: python scripts/extract_jira.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/*.json
+          git diff --staged --quiet || (git commit -m "chore: update JIRA data" && git push)

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard JIRA</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <h1>Dashboard JIRA</h1>
+    <p class="last-updated">Última atualização: <span id="lastUpdated">--</span></p>
+  </header>
+
+  <main class="main">
+    <section class="cards">
+      <div class="card">
+        <span class="card-value" id="totalIssues">0</span>
+        <span class="card-label">Total de Issues</span>
+      </div>
+      <div class="card card-progress">
+        <span class="card-value" id="inProgress">0</span>
+        <span class="card-label">Em Progresso</span>
+      </div>
+      <div class="card card-done">
+        <span class="card-value" id="done">0</span>
+        <span class="card-label">Concluídas</span>
+      </div>
+    </section>
+
+    <section class="charts">
+      <div class="chart-container">
+        <h2>Issues por Status</h2>
+        <canvas id="chartStatus"></canvas>
+      </div>
+      <div class="chart-container">
+        <h2>Issues por Tipo</h2>
+        <canvas id="chartType"></canvas>
+      </div>
+      <div class="chart-container chart-wide">
+        <h2>Issues por Responsável</h2>
+        <canvas id="chartAssignee"></canvas>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <h2>Últimas Issues</h2>
+      <div class="table-wrapper">
+        <table class="issues-table">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Resumo</th>
+              <th>Status</th>
+              <th>Tipo</th>
+              <th>Responsável</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="issuesTableBody">
+            <tr><td colspan="6">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Dados extraídos do JIRA via GitHub Actions</p>
+  </footer>
+
+  <script src="js/charts.js"></script>
+</body>
+</html>
