@@ -32,6 +32,8 @@ JIRA_URL = _normalize_jira_url(os.getenv("JIRA_URL", ""))
 JIRA_EMAIL = os.getenv("JIRA_EMAIL", "")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN", "")
 JIRA_FILTER_IDS = os.getenv("JIRA_FILTER_IDS", "")
+# JQL padrão: Jira Cloud exige consultas limitadas (ex: updated >= -90d)
+JIRA_JQL_DEFAULT = os.getenv("JIRA_JQL_DEFAULT", "updated >= -90d ORDER BY updated DESC")
 # Jira Cloud = api/3, Jira Server/Data Center = api/2
 JIRA_API_VERSION = os.getenv("JIRA_API_VERSION", "3")
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -42,10 +44,13 @@ def get_auth():
     return (JIRA_EMAIL, JIRA_API_TOKEN)
 
 
-def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000) -> list:
+def fetch_all_issues(jql: str | None = None, max_results: int = 1000) -> list:
     """Busca issues do JIRA usando JQL com paginação.
     Usa /rest/api/3/search/jql (novo endpoint - /search foi descontinuado e retorna 410).
+    Jira Cloud exige JQL limitada (ex: updated >= -90d).
     """
+    if jql is None:
+        jql = JIRA_JQL_DEFAULT
     if not all([JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN]):
         print("Erro: Configure JIRA_URL, JIRA_EMAIL e JIRA_API_TOKEN no .env")
         sys.exit(1)
@@ -122,12 +127,20 @@ def get_filter_jql(filter_id: str) -> str | None:
     return data.get("jql")
 
 
+def _ensure_bounded_jql(jql: str) -> str:
+    """Adiciona restrição de data se a JQL for ilimitada (exigência do Jira Cloud)."""
+    jql_lower = jql.lower()
+    if any(x in jql_lower for x in ("updated", "created", "resolved")):
+        return jql  # Já tem restrição de data
+    return f"({jql}) AND updated >= -90d"
+
+
 def fetch_filter_issues(filter_id: str) -> list:
     """Busca issues de um filtro personalizado."""
     jql = get_filter_jql(filter_id)
     if not jql:
         return []
-    return fetch_all_issues(jql=jql, max_results=500)
+    return fetch_all_issues(jql=_ensure_bounded_jql(jql), max_results=500)
 
 
 def normalize_issue(issue: dict) -> dict:
