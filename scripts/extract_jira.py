@@ -48,13 +48,14 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
         print("Erro: Configure JIRA_URL, JIRA_EMAIL e JIRA_API_TOKEN no .env")
         sys.exit(1)
 
-    url = f"{JIRA_URL}/rest/api/{JIRA_API_VERSION}/search"
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    headers = {"Accept": "application/json"}
     all_issues = []
     start_at = 0
     max_per_page = 100
 
-    while True:
+    api_ver_ok = None
+    for api_ver in [JIRA_API_VERSION, "2", "3"]:
+        url = f"{JIRA_URL}/rest/api/{api_ver}/search"
         params = {
             "jql": jql,
             "startAt": start_at,
@@ -68,15 +69,27 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
             auth=get_auth(),
             timeout=30,
         )
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            print(f"API v{api_ver}: status {resp.status_code}, tentando outra versão...")
+            continue
+        ct = resp.headers.get("Content-Type", "")
+        if "application/json" not in ct and resp.text.strip().startswith("<"):
+            print(f"API v{api_ver}: resposta HTML (possível página de login/erro)")
+            print(f"  Início da resposta: {resp.text[:150]!r}")
+            continue
         try:
             data = resp.json()
         except json.JSONDecodeError:
-            print(f"Erro: a API do JIRA retornou algo que não é JSON.")
-            print(f"Status HTTP: {resp.status_code}")
-            print(f"Resposta (início): {resp.text[:300]!r}")
-            print("Dica: Verifique JIRA_URL (ex: https://sua-empresa.atlassian.net) e credenciais.")
-            raise
+            print(f"API v{api_ver}: resposta não é JSON. Início: {resp.text[:150]!r}")
+            continue
+        api_ver_ok = api_ver
+        break
+    else:
+        print("Erro: Nenhuma versão da API retornou JSON válido.")
+        print("Verifique: JIRA_URL (apenas base, ex: https://xxx.atlassian.net), JIRA_EMAIL, JIRA_API_TOKEN")
+        sys.exit(1)
+
+    while True:
         issues = data.get("issues", [])
         all_issues.extend(issues)
         total = data.get("total", 0)
@@ -85,6 +98,16 @@ def fetch_all_issues(jql: str = "order by updated DESC", max_results: int = 1000
         start_at += len(issues)
         if len(all_issues) >= max_results:
             break
+        params["startAt"] = start_at
+        resp = requests.get(
+            f"{JIRA_URL}/rest/api/{api_ver_ok}/search",
+            params=params,
+            headers=headers,
+            auth=get_auth(),
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
 
     return all_issues[:max_results]
 
