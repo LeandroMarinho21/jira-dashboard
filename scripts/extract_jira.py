@@ -68,6 +68,8 @@ def fetch_all_issues(jql: str | None = None, max_results: int = 1000) -> list:
             params = {
                 "jql": jql,
                 "maxResults": min(max_per_page, max_results - len(all_issues)),
+                "fields": fields,
+                "expand": "names",
             }
             if next_page_token:
                 params["nextPageToken"] = next_page_token
@@ -143,26 +145,56 @@ def fetch_filter_issues(filter_id: str) -> list:
     return fetch_all_issues(jql=_ensure_bounded_jql(jql), max_results=500)
 
 
+def _extract_key(issue: dict) -> str:
+    """Extrai a key da issue de diferentes estruturas da API."""
+    key = issue.get("key")
+    if key:
+        return key
+    self_url = issue.get("self", "")
+    if self_url:
+        parts = self_url.rstrip("/").split("/")
+        if parts:
+            return parts[-1]
+    return ""
+
+
 def normalize_issue(issue: dict) -> dict:
     """Normaliza uma issue para o formato do dashboard."""
-    fields = issue.get("fields", {})
-    status = fields.get("status") or {}
-    issuetype = fields.get("issuetype") or {}
-    priority = fields.get("priority") or {}
-    assignee = fields.get("assignee") or {}
-    project = fields.get("project") or {}
+    fields = issue.get("fields") or {}
+    if not isinstance(fields, dict):
+        fields = {}
+    status = fields.get("status")
+    issuetype = fields.get("issuetype")
+    priority = fields.get("priority")
+    assignee = fields.get("assignee")
+    project = fields.get("project")
 
+    def _name(obj, default="Unknown"):
+        if obj is None:
+            return default
+        if isinstance(obj, str):
+            return obj
+        return obj.get("name", default) if isinstance(obj, dict) else default
+
+    def _display_name(obj, default="Unassigned"):
+        if obj is None:
+            return default
+        if isinstance(obj, str):
+            return obj
+        return obj.get("displayName", default) if isinstance(obj, dict) else default
+
+    key = _extract_key(issue)
     return {
-        "key": issue.get("key", ""),
-        "summary": fields.get("summary", ""),
-        "status": status.get("name", "Unknown"),
-        "issuetype": issuetype.get("name", "Unknown"),
-        "priority": priority.get("name", "None"),
-        "assignee": assignee.get("displayName", "Unassigned"),
-        "project": project.get("key", ""),
-        "created": fields.get("created", ""),
-        "updated": fields.get("updated", ""),
-        "url": f"{JIRA_URL}/browse/{issue.get('key', '')}",
+        "key": key,
+        "summary": fields.get("summary") or "",
+        "status": _name(status),
+        "issuetype": _name(issuetype),
+        "priority": _name(priority, "None"),
+        "assignee": _display_name(assignee),
+        "project": (project.get("key", "") if isinstance(project, dict) else "") or "",
+        "created": fields.get("created") or "",
+        "updated": fields.get("updated") or "",
+        "url": f"{JIRA_URL}/browse/{key}" if key else "",
     }
 
 
