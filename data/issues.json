@@ -1,60 +1,63 @@
 {
   "issues": [
     {
-      "key": "",
-      "summary": "",
-      "status": "Unknown",
-      "issuetype": "Unknown",
+      "key": "SCRUM-2",
+      "summary": "Dashboard das tarefas no JIRA",
+      "status": "Em andamento",
+      "issuetype": "História",
       "priority": "None",
       "assignee": "Unassigned",
-      "project": "",
-      "created": "",
-      "updated": "",
-      "url": "https://leandrolord20.atlassian.net/browse/"
+      "project": "SCRUM",
+      "created": "2026-02-24T11:38:21.024-0300",
+      "updated": "2026-02-24T11:53:53.852-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-2"
     },
     {
-      "key": "",
-      "summary": "",
-      "status": "Unknown",
-      "issuetype": "Unknown",
+      "key": "SCRUM-1",
+      "summary": "Dashboard no JIRA",
+      "status": "A fazer",
+      "issuetype": "Tarefa",
       "priority": "None",
       "assignee": "Unassigned",
-      "project": "",
-      "created": "",
-      "updated": "",
-      "url": "https://leandrolord20.atlassian.net/browse/"
+      "project": "SCRUM",
+      "created": "2026-02-24T11:38:19.809-0300",
+      "updated": "2026-02-24T11:53:38.944-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-1"
     },
     {
-      "key": "",
-      "summary": "",
-      "status": "Unknown",
-      "issuetype": "Unknown",
+      "key": "SCRUM-4",
+      "summary": "Subtarefa 2.1",
+      "status": "A fazer",
+      "issuetype": "Subtask",
       "priority": "None",
       "assignee": "Unassigned",
-      "project": "",
-      "created": "",
-      "updated": "",
-      "url": "https://leandrolord20.atlassian.net/browse/"
+      "project": "SCRUM",
+      "created": "2026-02-24T11:38:22.921-0300",
+      "updated": "2026-02-24T11:38:23.649-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-4"
     },
     {
-      "key": "",
-      "summary": "",
-      "status": "Unknown",
-      "issuetype": "Unknown",
+      "key": "SCRUM-3",
+      "summary": "Tarefa 3",
+      "status": "Em andamento",
+      "issuetype": "Tarefa",
       "priority": "None",
       "assignee": "Unassigned",
-      "project": "",
-      "created": "",
-      "updated": "",
-      "url": "https://leandrolord20.atlassian.net/browse/"
+      "project": "SCRUM",
+      "created": "2026-02-24T11:38:21.301-0300",
+      "updated": "2026-02-24T11:38:22.481-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-3"
     }
   ],
   "aggregates": {
     "by_status": {
-      "Unknown": 4
+      "Em andamento": 2,
+      "A fazer": 2
     },
     "by_type": {
-      "Unknown": 4
+      "História": 1,
+      "Tarefa": 2,
+      "Subtask": 1
     },
     "by_assignee": {
       "Unassigned": 4
@@ -64,5 +67,5 @@
     },
     "total": 4
   },
-  "last_updated": ""
+  "last_updated": "2026-02-24T11:53:53.852-0300"
 }
