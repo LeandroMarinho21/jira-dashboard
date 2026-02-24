@@ -1,11 +1,68 @@
 {
-  "issues": [],
+  "issues": [
+    {
+      "key": "",
+      "summary": "",
+      "status": "Unknown",
+      "issuetype": "Unknown",
+      "priority": "None",
+      "assignee": "Unassigned",
+      "project": "",
+      "created": "",
+      "updated": "",
+      "url": "https://leandrolord20.atlassian.net/browse/"
+    },
+    {
+      "key": "",
+      "summary": "",
+      "status": "Unknown",
+      "issuetype": "Unknown",
+      "priority": "None",
+      "assignee": "Unassigned",
+      "project": "",
+      "created": "",
+      "updated": "",
+      "url": "https://leandrolord20.atlassian.net/browse/"
+    },
+    {
+      "key": "",
+      "summary": "",
+      "status": "Unknown",
+      "issuetype": "Unknown",
+      "priority": "None",
+      "assignee": "Unassigned",
+      "project": "",
+      "created": "",
+      "updated": "",
+      "url": "https://leandrolord20.atlassian.net/browse/"
+    },
+    {
+      "key": "",
+      "summary": "",
+      "status": "Unknown",
+      "issuetype": "Unknown",
+      "priority": "None",
+      "assignee": "Unassigned",
+      "project": "",
+      "created": "",
+      "updated": "",
+      "url": "https://leandrolord20.atlassian.net/browse/"
+    }
+  ],
   "aggregates": {
-    "by_status": {},
-    "by_type": {},
-    "by_assignee": {},
-    "by_priority": {},
-    "total": 0
+    "by_status": {
+      "Unknown": 4
+    },
+    "by_type": {
+      "Unknown": 4
+    },
+    "by_assignee": {
+      "Unassigned": 4
+    },
+    "by_priority": {
+      "None": 4
+    },
+    "total": 4
   },
   "last_updated": ""
 }
