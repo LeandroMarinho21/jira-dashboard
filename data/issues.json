@@ -1,40 +1,28 @@
 {
   "issues": [
     {
-      "key": "SCRUM-2",
-      "summary": "Dashboard das tarefas no JIRA",
-      "status": "Em andamento",
-      "issuetype": "História",
-      "priority": "None",
-      "assignee": "Unassigned",
-      "project": "SCRUM",
-      "created": "2026-02-24T11:38:21.024-0300",
-      "updated": "2026-02-24T11:53:53.852-0300",
-      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-2"
-    },
-    {
       "key": "SCRUM-1",
       "summary": "Dashboard no JIRA",
       "status": "A fazer",
       "issuetype": "Tarefa",
       "priority": "None",
-      "assignee": "Unassigned",
+      "assignee": "LEANDRO MARINHO",
       "project": "SCRUM",
       "created": "2026-02-24T11:38:19.809-0300",
-      "updated": "2026-02-24T11:53:38.944-0300",
+      "updated": "2026-02-24T16:55:14.000-0300",
       "url": "https://leandrolord20.atlassian.net/browse/SCRUM-1"
     },
     {
-      "key": "SCRUM-4",
-      "summary": "Subtarefa 2.1",
-      "status": "A fazer",
-      "issuetype": "Subtask",
+      "key": "SCRUM-2",
+      "summary": "Dashboard das tarefas no JIRA",
+      "status": "Em andamento",
+      "issuetype": "História",
       "priority": "None",
-      "assignee": "Unassigned",
+      "assignee": "LEANDRO MARINHO",
       "project": "SCRUM",
-      "created": "2026-02-24T11:38:22.921-0300",
-      "updated": "2026-02-24T11:38:23.649-0300",
-      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-4"
+      "created": "2026-02-24T11:38:21.024-0300",
+      "updated": "2026-02-24T16:55:12.353-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-2"
     },
     {
       "key": "SCRUM-3",
@@ -42,30 +30,42 @@
       "status": "Em andamento",
       "issuetype": "Tarefa",
       "priority": "None",
-      "assignee": "Unassigned",
+      "assignee": "LEANDRO MARINHO",
       "project": "SCRUM",
       "created": "2026-02-24T11:38:21.301-0300",
-      "updated": "2026-02-24T11:38:22.481-0300",
+      "updated": "2026-02-24T16:55:10.637-0300",
       "url": "https://leandrolord20.atlassian.net/browse/SCRUM-3"
+    },
+    {
+      "key": "SCRUM-4",
+      "summary": "Subtarefa 2.1",
+      "status": "A fazer",
+      "issuetype": "Subtask",
+      "priority": "None",
+      "assignee": "LEANDRO MARINHO",
+      "project": "SCRUM",
+      "created": "2026-02-24T11:38:22.921-0300",
+      "updated": "2026-02-24T16:55:08.565-0300",
+      "url": "https://leandrolord20.atlassian.net/browse/SCRUM-4"
     }
   ],
   "aggregates": {
     "by_status": {
-      "Em andamento": 2,
-      "A fazer": 2
+      "A fazer": 2,
+      "Em andamento": 2
     },
     "by_type": {
-      "História": 1,
       "Tarefa": 2,
+      "História": 1,
       "Subtask": 1
     },
     "by_assignee": {
-      "Unassigned": 4
+      "LEANDRO MARINHO": 4
     },
     "by_priority": {
       "None": 4
     },
     "total": 4
   },
-  "last_updated": "2026-02-24T11:53:53.852-0300"
+  "last_updated": "2026-02-24T16:55:14.000-0300"
 }
